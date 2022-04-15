@@ -2,9 +2,10 @@ package com.timelost.irisfeller;
 
 import com.timelost.irisfeller.util.IrisToolbeltManager;
 import com.timelost.irisfeller.util.J;
-import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -32,37 +33,46 @@ public class BlockBreakLogger implements Listener {
             if (id.contains("tree")) {
                 J.a(() -> {
                     boolean easteregg = false;
-                    java.util.Random rand = new java.util.Random();
-                    double f = rand.nextDouble();
-                    if (f < 0.01) {
+                    if (Math.random() < 0.01) {
                         easteregg = true;
                     }
-                    int j = 0;
+
                     boolean stw[] = {false};
-                    Set<Integer> ids = new LinkedHashSet<>();
                     Set<Block> blocks = getConnectedBlocks(b, id);
 
                     for (Block i : blocks) {
 
                         boolean finalEasteregg = easteregg;
-                        ids.add(J.s(() -> {
-                            stw[0] = true;
+                        J.s(() -> {
+                            if (stw[0]) {
+                                return;
+                            }
                             // Perm check here too for claims etc...
                             if (e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) { //Player holding ANY axe.
                                 ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
-                                short durability = is.getDurability();
-                                if (is.getItemMeta() != null && is.getItemMeta().isUnbreakable()) {
-                                    IrisToolbeltManager.deleteMantleBlock(e.getBlock().getWorld(), i.getX(), i.getY(), i.getZ());
-                                } else {
-                                    //do damage
-                                    if (!i.getBlockData().getAsString().contains("leaves")) { // not leaves
-                                        is.setDurability((short) (durability + 1));
-                                        e.getPlayer().getInventory().setItemInMainHand(is);
+
+                                //do damage
+                                if (!i.getBlockData().getAsString().contains("leaves")) { // not leaves
+
+                                    if (!(is.getItemMeta().isUnbreakable())) {
+
+                                        double max = Math.min(((double) is.getEnchantmentLevel(Enchantment.DURABILITY)) / 6, 0.35);
+                                        if (Math.random() < 0.5 - max) {
+                                            is.setDurability((short) (is.getDurability() + 1));
+                                        }
                                     }
 
-                                    i.breakNaturally(is);
-                                    IrisToolbeltManager.deleteMantleBlock(e.getBlock().getWorld(), i.getX(), i.getY(), i.getZ());
+                                    if (is.getDurability() >= is.getType().getMaxDurability()) {
+                                        is = new ItemStack(Material.AIR);
+                                        stw[0] = true;
+                                        e.getPlayer().sendMessage("Item Broken");
+                                    }
+                                    e.getPlayer().getInventory().setItemInMainHand(is);
                                 }
+
+                                i.breakNaturally(is);
+                                IrisToolbeltManager.deleteMantleBlock(e.getBlock().getWorld(), i.getX(), i.getY(), i.getZ());
+
 
                                 if (finalEasteregg) {
                                     e.getPlayer().getWorld().playSound(i.getLocation(), Sound.AMBIENT_CAVE, 1, 0.1f + (float) (Math.random() * 1.35));
@@ -71,12 +81,11 @@ public class BlockBreakLogger implements Listener {
                                 }
 
                             } else {
-                                for (int idd : ids) { // PROBABLY NOT SAFE?
-                                    Bukkit.getScheduler().cancelTask(idd);
-                                }
+                                stw[0] = true;
+
                             }
 
-                        }, (j++) / 10));
+                        });
 
                     }
 

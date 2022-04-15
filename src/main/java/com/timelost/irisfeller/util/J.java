@@ -13,12 +13,12 @@ public class J {
         return Bukkit.getScheduler().scheduleSyncDelayedTask(IrisFeller.getPlugin(), r,delay);
     }
 
-    public static int a(Runnable r){
-        return a(r,0);
+    public static void a(Runnable r){
+        IrisFeller.async.queue(r);
     }
 
-    public static int s(Runnable r){
-        return s(r,0);
+    public static void s(Runnable r){
+        IrisFeller.sync.queue(r);
     }
 
 

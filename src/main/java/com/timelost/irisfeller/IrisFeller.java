@@ -1,29 +1,37 @@
 package com.timelost.irisfeller;
 
 import com.timelost.irisfeller.util.IrisToolbeltManager;
+import com.timelost.irisfeller.util.TheChonker;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
 public class IrisFeller extends JavaPlugin {
     private static IrisFeller plugin;
+    public static TheChonker async;
+    public static TheChonker sync;
+
 
     @Override
     public void onEnable() {
         plugin = this;
+        async = new TheChonker(true);
+        sync = new TheChonker(false);
+
         try {
             IrisToolbeltManager.setup();
             startup("Hello Iris! i got your objects!");
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        this.getServer().getPluginManager().registerEvents(new BlockBreakLogger(), IrisFeller.this);
+        getServer().getPluginManager().registerEvents(new BlockBreakLogger(), IrisFeller.this);
 
     }
 
     @Override
     public void onDisable() {
         IrisFeller.info("Goodbye Iris... Make sure you save the mantle!");
+        getServer().getScheduler().cancelTasks(this);
     }
 
     public static IrisFeller getPlugin() {
