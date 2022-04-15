@@ -1,0 +1,6 @@
+name: ${name}
+version: ${version}
+main: ${main}
+authors: [NextdoorPsycho]
+website: github.com/TimelostSoftware
+api-version: ${apiversion}
