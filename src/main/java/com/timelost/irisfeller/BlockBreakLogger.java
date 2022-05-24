@@ -1,7 +1,7 @@
 package com.timelost.irisfeller;
 
 import com.timelost.irisfeller.util.IrisToolbeltManager;
-import com.timelost.irisfeller.util.J;
+import com.timelost.irisfeller.util.Jobs;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -30,7 +30,7 @@ public class BlockBreakLogger implements Listener {
             //is an iris block
 
             if (id.contains("tree")) {
-                J.a(() -> {
+                Jobs.async(() -> {
                     boolean easteregg = Math.random() < 0.01;
 
                     boolean[] stw = {false};
@@ -38,17 +38,17 @@ public class BlockBreakLogger implements Listener {
 
                     for (Block i : blocks) {
 
-                        J.s(() -> {
+                        Jobs.sync(() -> {
                             if (stw[0]) {
                                 return;
                             }
                             //TODO:  Perm check here too for claims etc...
-                            if (e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) { //Player holding ANY axe.
+                            if (e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) {
                                 ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
 
                                 if (!i.getBlockData().getAsString().contains("leaves")) { // not leaves
 
-                                    if (!( is.getItemMeta() != null && is.getItemMeta().isUnbreakable())) {
+                                    if (!IrisFellerSettings.USE_DURABILITY.get() || !( is.getItemMeta() != null && is.getItemMeta().isUnbreakable())) {
 
                                         double max = Math.min(((double) is.getEnchantmentLevel(Enchantment.DURABILITY)) / 6, 0.35);
                                         if (Math.random() < 0.5 - max) {
@@ -129,20 +129,14 @@ public class BlockBreakLogger implements Listener {
             new BlockVector(-1, 0, 1),
             new BlockVector(-1, 1, 1),
             new BlockVector(-1, -1, 1),
-
-
     };
 
     private void getConnectedBlockRelation(Block block, Set<Block> collection, List<Block> todo, String id) {
         for (BlockVector face : faces) {
             Block b = block.getWorld().getBlockAt(block.getLocation().add(face));
             String iid = IrisToolbeltManager.getMantleIdentity(block.getWorld(), block.getX(), block.getY(), block.getZ());
-            if (iid != null) {
-                if (iid.equals(id)) {
-                    if (collection.add(b)) {
-                        todo.add(b);
-                    }
-                }
+            if (iid != null && iid.equals(id) && collection.add(b)) {
+                todo.add(b);
             }
         }
     }

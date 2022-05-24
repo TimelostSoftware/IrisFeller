@@ -1,7 +1,6 @@
 package com.timelost.irisfeller.util.settings.types;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.timelost.irisfeller.util.Serializable;
 import com.timelost.irisfeller.util.settings.ParseResult;

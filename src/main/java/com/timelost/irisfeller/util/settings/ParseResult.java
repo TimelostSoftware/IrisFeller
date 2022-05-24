@@ -1,6 +1,5 @@
 package com.timelost.irisfeller.util.settings;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;

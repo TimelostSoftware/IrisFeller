@@ -1,6 +1,7 @@
 package com.timelost.irisfeller.util;
 
 import com.timelost.irisfeller.IrisFeller;
+import com.timelost.irisfeller.IrisFellerSettings;
 import org.bukkit.Bukkit;
 
 import java.util.Queue;
@@ -9,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class TheChonker {
     private final Queue<Runnable> queue = new ConcurrentLinkedDeque<>();
     private int id;
-    private double limmit = 1.5;
+    private double limmit = IrisFellerSettings.MAX_SERVER_TICK_PERCENT.get();
     private final boolean async;
 
     public TheChonker(boolean async) {
