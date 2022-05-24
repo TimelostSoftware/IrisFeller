@@ -1,7 +1,7 @@
 package com.timelost.irisfeller;
 
 import com.timelost.irisfeller.util.IrisToolbeltManager;
-import com.timelost.irisfeller.util.Jobs;
+import com.timelost.irisfeller.util.J;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -18,43 +18,37 @@ import java.util.List;
 import java.util.Set;
 
 public class BlockBreakLogger implements Listener {
-
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void BlockBreakEvent(BlockBreakEvent e) {
         Block b = e.getBlock();
         String id = IrisToolbeltManager.getMantleIdentity(e.getBlock().getWorld(), e.getBlock().getX(), e.getBlock().getY(), e.getBlock().getZ());
 
 
-        if (id != null) {
+        if (id != null && e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) {
+//            List<ItemStack> items = new LinkedList<>(); // TODO: LATER
             //is an iris block
 
-
-            // Actual Break Code:
             if (id.contains("tree")) {
-                Jobs.async(() -> {
-                    boolean easteregg = false;
-                    if (Math.random() < 0.01) {
-                        easteregg = true;
-                    }
+                J.a(() -> {
+                    boolean easteregg = Math.random() < 0.01;
 
-                    boolean stw[] = {false};
+                    boolean[] stw = {false};
                     Set<Block> blocks = getConnectedBlocks(b, id);
 
                     for (Block i : blocks) {
 
-                        boolean finalEasteregg = easteregg;
-                        Jobs.sync(() -> {
+                        J.s(() -> {
                             if (stw[0]) {
                                 return;
                             }
-                            // Perm check here too for claims etc...
+                            //TODO:  Perm check here too for claims etc...
                             if (e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) { //Player holding ANY axe.
                                 ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
 
-                                //do damage
                                 if (!i.getBlockData().getAsString().contains("leaves")) { // not leaves
 
-                                    if (!(is.getItemMeta().isUnbreakable())) {
+                                    if (!( is.getItemMeta() != null && is.getItemMeta().isUnbreakable())) {
 
                                         double max = Math.min(((double) is.getEnchantmentLevel(Enchantment.DURABILITY)) / 6, 0.35);
                                         if (Math.random() < 0.5 - max) {
@@ -73,8 +67,7 @@ public class BlockBreakLogger implements Listener {
                                 i.breakNaturally(is);
                                 IrisToolbeltManager.deleteMantleBlock(e.getBlock().getWorld(), i.getX(), i.getY(), i.getZ());
 
-
-                                if (finalEasteregg) {
+                                if (easteregg) {
                                     e.getPlayer().getWorld().playSound(i.getLocation(), Sound.AMBIENT_CAVE, 1, 0.1f + (float) (Math.random() * 1.35));
                                 } else {
                                     e.getPlayer().getWorld().playSound(i.getLocation(), Sound.BLOCK_CHORUS_FLOWER_GROW, 0.5f, 0.1f + (float) (Math.random() * 1.35));
@@ -82,27 +75,17 @@ public class BlockBreakLogger implements Listener {
 
                             } else {
                                 stw[0] = true;
-
                             }
-
                         });
-
                     }
-
-
                 });
             }
-
-        } else {
-            // Not an iris block
-        }
-
-
+        }  // Not an iris block
     }
 
 
     private static final BlockVector[] faces = {
-            // Thanks dan
+            // Blame dan
             new BlockVector(0, 0, 0),
             new BlockVector(0, 1, 0),
             new BlockVector(0, -1, 0),
