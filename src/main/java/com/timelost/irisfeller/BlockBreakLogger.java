@@ -24,7 +24,6 @@ public class BlockBreakLogger implements Listener {
         Block b = e.getBlock();
         String id = IrisToolbeltManager.getMantleIdentity(e.getBlock().getWorld(), e.getBlock().getX(), e.getBlock().getY(), e.getBlock().getZ());
 
-
         if (id != null && e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) {
 //            List<ItemStack> items = new LinkedList<>(); // TODO: LATER
             //is an iris block
@@ -37,7 +36,6 @@ public class BlockBreakLogger implements Listener {
                     Set<Block> blocks = getConnectedBlocks(b, id);
 
                     for (Block i : blocks) {
-
                         Jobs.sync(() -> {
                             if (stw[0]) {
                                 return;
@@ -83,49 +81,46 @@ public class BlockBreakLogger implements Listener {
         }  // Not an iris block
     }
 
+    private void dumpInv(Player p, ArrayList<ItemStack> iStack) {
+        for (ItemStack i : iStack){
+            p.getInventory().addItem(i);
+        }
+
+    }
+
 
     private static final BlockVector[] faces = {
             // Blame dan
             new BlockVector(0, 0, 0),
             new BlockVector(0, 1, 0),
-            new BlockVector(0, -1, 0),
-
+            new BlockVector(0, -1, 0),//
             new BlockVector(1, 0, 0),
             new BlockVector(1, 1, 0),
-            new BlockVector(1, -1, 0),
-
+            new BlockVector(1, -1, 0),//
             new BlockVector(0, 0, 1),
             new BlockVector(0, 1, 1),
-            new BlockVector(0, -1, 1),
-
+            new BlockVector(0, -1, 1),//
             new BlockVector(1, 0, 1),
             new BlockVector(1, 1, 1),
-            new BlockVector(1, -1, 1),
-
+            new BlockVector(1, -1, 1),//
             new BlockVector(1, 0, 1),
             new BlockVector(1, 1, 1),
-            new BlockVector(1, -1, 1),
-
+            new BlockVector(1, -1, 1),//
             new BlockVector(-1, 0, 0),
             new BlockVector(-1, 1, 0),
-            new BlockVector(-1, -1, 0),
-
+            new BlockVector(-1, -1, 0),//
             new BlockVector(0, 0, -1),
             new BlockVector(0, 1, -1),
-            new BlockVector(0, -1, -1),
-
+            new BlockVector(0, -1, -1),//
             new BlockVector(-1, 0, 1),
             new BlockVector(-1, 1, 1),
-            new BlockVector(-1, -1, 1),
-
+            new BlockVector(-1, -1, 1),//
             new BlockVector(1, 0, -1),
             new BlockVector(1, 1, -1),
-            new BlockVector(1, -1, -1),
-
+            new BlockVector(1, -1, -1),//
             new BlockVector(1, 0, -1),
             new BlockVector(1, 1, -1),
-            new BlockVector(1, -1, -1),
-
+            new BlockVector(1, -1, -1),//
             new BlockVector(-1, 0, 1),
             new BlockVector(-1, 1, 1),
             new BlockVector(-1, -1, 1),
@@ -144,9 +139,7 @@ public class BlockBreakLogger implements Listener {
     public Set<Block> getConnectedBlocks(Block block, String id) {
         Set<Block> set = new LinkedHashSet<>();
         LinkedList<Block> list = new LinkedList<>();
-
         list.add(block);
-
         while ((block = list.poll()) != null) {
             getConnectedBlockRelation(block, set, list, id);
         }
