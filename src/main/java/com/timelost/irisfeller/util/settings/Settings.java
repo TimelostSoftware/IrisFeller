@@ -72,7 +72,7 @@ public abstract class Settings {
                 try {
                     entry.update(obj, triggerListeners);
                 } catch(SettingsParseException e) {
-                    LoggerUtils.logStringStack(logger, false, e.getStackTrace(), "Failed to parse settings entry \"%s\", skipping!", entry.getKey());
+                    LoggerUtils.logStringStack(logger, false, e.getStringStack(), "Failed to parse settings entry \"%s\", skipping!", entry.getKey());
                 }
             });
         } catch(IOException e) {
