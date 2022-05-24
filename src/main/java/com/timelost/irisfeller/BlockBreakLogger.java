@@ -136,7 +136,19 @@ public class BlockBreakLogger implements Listener {
         }
     }
 
-    public Set<Block> getConnectedBlocks(Block block, String id) {
+    private void playSound(BlockBreakEvent e, Block i) {
+        if (IrisFellerSettings.USE_SOUNDS.get()) {
+            boolean ea = Math.random() < 0.01;
+            if (IrisFellerSettings.USE_EASTEREGG_SOUNDS.get() && ea) {
+                e.getPlayer().getWorld().playSound(i.getLocation(), Sound.AMBIENT_CAVE, 1, 0.1f + (float) (Math.random() * 1.35));
+            } else {
+                e.getPlayer().getWorld().playSound(i.getLocation(), Sound.BLOCK_CHORUS_FLOWER_GROW, 0.5f, 0.1f + (float) (Math.random() * 1.35));
+            }
+        }
+    }
+
+
+    private Set<Block> getConnectedBlocks(Block block, String id) {
         Set<Block> set = new LinkedHashSet<>();
         LinkedList<Block> list = new LinkedList<>();
         list.add(block);
