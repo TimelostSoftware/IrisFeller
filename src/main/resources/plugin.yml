@@ -1,6 +1,6 @@
 name: ${name}
 version: ${version}
 main: ${main}
-authors: [NextdoorPsycho]
+authors: [NextdoorPsycho, Vatuu]
 website: github.com/TimelostSoftware
 api-version: ${apiversion}

@@ -24,7 +24,7 @@ public class Entry<V> {
     }
 
     public void set(V value, boolean triggerListeners) {
-        if(!value.equals(this.value))
+        if(value.equals(this.value))
             return;
         this.value = value;
         if(triggerListeners)
@@ -36,7 +36,7 @@ public class Entry<V> {
     }
 
     void serialize(JsonObject json) {
-        json.add(key, type.serialize(this.value));
+        json.add(key, type.serialize(this.value == null ? defaultValue : value));
     }
 
     void update(JsonObject obj, boolean triggerListener) throws SettingsParseException {

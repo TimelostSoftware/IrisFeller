@@ -15,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+// Made by Vatuu:tm:
+
 public abstract class Settings {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -43,8 +45,10 @@ public abstract class Settings {
             } catch(IOException e) {
                 LoggerUtils.logExceptionStack(logger, false, e, "An error occurred while writing the default settings file:");
             }
-        } else
+        } else {
             doReload(false);
+            write();
+        }
 
         this.fileWatcher = new FileWatcher(file);
     }

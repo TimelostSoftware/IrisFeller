@@ -9,7 +9,8 @@ import java.io.File;
 public class IrisFellerSettings extends Settings {
 
     public static final Entry<Boolean> USE_DURABILITY = new Entry<>("useDurability", EntryType.BOOLEAN, true, b -> { });
-    public static final Entry<Double> MAX_SERVER_TICK_PERCENT = new Entry<>("useDurability", EntryType.DOUBLE, 1.5, b -> { });
+    public static final Entry<Double> MAX_SERVER_TICK_PERCENT = new Entry<>("maxServerTickPercent", EntryType.DOUBLE, 1.5, p -> { });
+    public static final Entry<Boolean> USE_SOUNDS = new Entry<>("useSounds", EntryType.BOOLEAN, true, b -> { });
 
     public IrisFellerSettings(File parentDir) {
         super(IrisFeller.getPlugin().getLogger(), new File(parentDir, "settings.json"));
@@ -17,7 +18,6 @@ public class IrisFellerSettings extends Settings {
 
     @Override
     protected void registerEntries() {
-        registerField(USE_DURABILITY);
-        registerField(MAX_SERVER_TICK_PERCENT);
+        registerField(USE_DURABILITY, MAX_SERVER_TICK_PERCENT, USE_SOUNDS);
     }
 }
