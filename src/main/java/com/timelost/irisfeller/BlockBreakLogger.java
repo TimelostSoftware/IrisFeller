@@ -33,6 +33,7 @@ public class BlockBreakLogger implements Listener {
                     boolean easteregg = Math.random() < 0.01;
 
                     boolean[] stw = {false};
+                    ArrayList<ItemStack> iStack = new ArrayList<>();
                     Set<Block> blocks = getConnectedBlocks(b, id);
 
                     for (Block i : blocks) {
