@@ -1,9 +1,12 @@
 package com.timelost.irisfeller;
 
 import com.timelost.irisfeller.util.IrisToolbeltManager;
+import com.timelost.irisfeller.util.Jobs;
 import com.timelost.irisfeller.util.TheChonker;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 
 public class IrisFeller extends JavaPlugin {
@@ -11,10 +14,15 @@ public class IrisFeller extends JavaPlugin {
     public static TheChonker async;
     public static TheChonker sync;
 
+    public static IrisFellerSettings settings;
 
     @Override
     public void onEnable() {
         plugin = this;
+
+        settings = new IrisFellerSettings(getDataFolder());
+        Jobs.scheduleSyncTask(100L, () -> settings.update(), true);
+
         async = new TheChonker(true);
         sync = new TheChonker(false);
 

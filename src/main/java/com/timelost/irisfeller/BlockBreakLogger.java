@@ -1,7 +1,7 @@
 package com.timelost.irisfeller;
 
 import com.timelost.irisfeller.util.IrisToolbeltManager;
-import com.timelost.irisfeller.util.J;
+import com.timelost.irisfeller.util.Jobs;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -31,7 +31,7 @@ public class BlockBreakLogger implements Listener {
 
             // Actual Break Code:
             if (id.contains("tree")) {
-                J.a(() -> {
+                Jobs.async(() -> {
                     boolean easteregg = false;
                     if (Math.random() < 0.01) {
                         easteregg = true;
@@ -43,7 +43,7 @@ public class BlockBreakLogger implements Listener {
                     for (Block i : blocks) {
 
                         boolean finalEasteregg = easteregg;
-                        J.s(() -> {
+                        Jobs.sync(() -> {
                             if (stw[0]) {
                                 return;
                             }
