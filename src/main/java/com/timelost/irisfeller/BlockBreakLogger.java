@@ -39,8 +39,16 @@ public class BlockBreakLogger implements Listener {
                         if (stw[0]) {
                             return;
                         }
+                        if (IrisToolbeltManager.getMantleBlock(e.getBlock().getWorld(), i.getX(), i.getY(), i.getZ()) == null) {
+                            blocks.remove(i);
+                            return;
+                        }
+                        if (IrisToolbeltManager.getMantleBlock(e.getBlock().getWorld(), i.getX(), i.getY(), i.getZ()).getMaterial() != i.getBlockData().getMaterial()) {
+                            IrisFeller.info(IrisToolbeltManager.getMantleBlock(e.getBlock().getWorld(), i.getX(), i.getY(), i.getZ()).getMaterial() + "  :  " + i.getBlockData().getMaterial());
+                            blocks.remove(i);
+                            return;
+                        }
                         if (e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) {
-
                             if (!i.getBlockData().getAsString().contains("leaves")) { // not leaves
                                 if (!IrisFellerSettings.USE_DURABILITY.get() || !(is.getItemMeta() != null && is.getItemMeta().isUnbreakable())) {
                                     double max = Math.min(((double) is.getEnchantmentLevel(Enchantment.DURABILITY)) / 6, 0.35);
@@ -48,26 +56,27 @@ public class BlockBreakLogger implements Listener {
                                         is.setDurability((short) (is.getDurability() + 1));
                                     }
                                 }
-
                                 if (is.getDurability() >= is.getType().getMaxDurability()) {
                                     is = new ItemStack(Material.AIR);
-                                    hasher(blockDupeList, e);
+                                    if (!IrisFellerSettings.DROP_NATURALLY.get()) {
+                                        dimPocketItems(blockDupeList, e); // TODO REMOVE
+                                    }
                                     stw[0] = true;
                                 }
                                 e.getPlayer().getInventory().setItemInMainHand(is);
                             }
+                            blockDupeList.add(i.getType()); // Add to list
+                            blocks.remove(i); // Drop from List
+                            breakBlock(i, is, e.getPlayer(), e); // Deletes the block regardless
 
-                            blockDupeList.add(i.getType());
-                            blocks.remove(i);
-                            breakBlock(i, is, e.getPlayer(), e);
-                            IrisFeller.info(String.valueOf(blocks.size()));
-                            if(blocks.size() == 0) {
-                                hasher(blockDupeList, e);
+                            if (blocks.size() == 0 && !IrisFellerSettings.DROP_NATURALLY.get()) {
+                                dimPocketItems(blockDupeList, e);
                                 stw[0] = true;
                             }
-
                         } else {
-                            hasher(blockDupeList, e);
+                            if (!IrisFellerSettings.DROP_NATURALLY.get()) {
+                                dimPocketItems(blockDupeList, e); // TODO REMOVE
+                            }
                             stw[0] = true;
                         }
                     });
@@ -78,36 +87,39 @@ public class BlockBreakLogger implements Listener {
         }  // Not an iris block
     }
 
-    private void hasher(List<Material> blockDupeList, BlockBreakEvent e) {
+    private void dimPocketItems(List<Material> blockDupeList, BlockBreakEvent e) {
         Map<Material, Long> couterMap = blockDupeList.stream().collect(Collectors.groupingBy(d -> d, Collectors.counting()));
         IrisFeller.info("Counter: " + couterMap.toString());
-        e.getPlayer().sendMessage("Counter: " + couterMap);
         Jobs.sync(() -> couterMap.forEach((material, count) -> {
             if (material.toString().contains("LEAVES")) {
-                e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(Material.getMaterial(material.toString().replace("_LEAVES", "_SAPLING")), 5));
+                if (e.getPlayer().getInventory().firstEmpty() != -1) {
+                    e.getPlayer().getInventory().addItem(new ItemStack(Material.getMaterial(material.toString().replace("_LEAVES", "_SAPLING")), 5));
+                } else {
+                    e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(Material.getMaterial(material.toString().replace("_LEAVES", "_SAPLING")), 5));
+                }
+
                 return;
             }
-            int sCount = (count.intValue() / 64);
 
-            if (count.intValue() > 64) {
-                for (int i = sCount; i >= 0; i--) {
+            long sCount = count / 64;
+
+            //Main Stacks
+            if (count >= 64) {
+                for (int i = 0; i < sCount; i++) {
                     if (e.getPlayer().getInventory().firstEmpty() != -1) {
-                        e.getPlayer().getInventory().addItem(new ItemStack(material));
+                        e.getPlayer().getInventory().addItem(new ItemStack(material, 64));
                     } else {
-                        e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(material, count.intValue() % 64));
+                        e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(material, 64));
                     }
-                    e.getPlayer().sendMessage("" + material + " : " + count);
-
                 }
-            } else {
-                if (e.getPlayer().getInventory().firstEmpty() != -1) {
-                    e.getPlayer().getInventory().addItem(new ItemStack(material, Math.toIntExact(count)));
-                } else {
-                    e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(material, count.intValue()));
-                }
-                e.getPlayer().sendMessage("" + material + " : " + count);
-
             }
+            //rest of the stack
+            if (e.getPlayer().getInventory().firstEmpty() != -1) {
+                e.getPlayer().getInventory().addItem(new ItemStack(material, (int) (count % 64)));
+            } else {
+                e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(material, (int) (count % 64)));
+            }
+
         }));
     }
 
