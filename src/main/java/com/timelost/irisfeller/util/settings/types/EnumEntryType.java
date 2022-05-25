@@ -36,4 +36,8 @@ public class EnumEntryType<E extends Enum<E> & Serializable<String>> implements 
                 return Optional.of(e);
         return Optional.empty();
     }
+
+    public static <E extends Enum<E>> E getEnumOrDefault(Class<E> clazz, E defaultValue, Predicate<E> test) {
+        return getEnum(clazz, test).orElse(defaultValue);
+    }
 }
