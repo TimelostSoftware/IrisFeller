@@ -1,8 +1,11 @@
 package com.timelost.irisfeller.util.settings;
 
+import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -18,6 +21,13 @@ public class ParseResult<R> {
 
     public static <R> ParseResult<R> error(String... error) {
         return new ParseResult<>(null, Arrays.asList(error));
+    }
+
+    public static <R> ParseResult<R> error(String error, Collection<String> stack) {
+        List<String> errors = Lists.newArrayList(error);
+        if(stack.isEmpty())
+            errors.addAll(stack);
+        return new ParseResult<>(null, errors);
     }
 
     private ParseResult(R result, List<String> error) {
