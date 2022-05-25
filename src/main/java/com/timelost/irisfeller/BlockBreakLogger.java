@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BlockBreakLogger implements Listener {
     @SuppressWarnings("deprecation")
@@ -25,65 +26,95 @@ public class BlockBreakLogger implements Listener {
         if (id != null && e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_" + IrisFellerSettings.LOGGER_TOOL.get()) && id.contains("tree")) {
             //TODO:  Perm check here too for claims etc...
 
-            List<ItemStack> blockList = new LinkedList<>(); // TODO: LATER
+            List<Material> blockDupeList = new ArrayList<>();
 
             Jobs.async(() -> {
-                boolean easteregg = Math.random() < 0.01;
                 boolean[] stw = {false};
                 Set<Block> blocks = getConnectedBlocks(b, id);
 
+
                 for (Block i : blocks) {
-                    if (i.getBlockData().getMaterial() != Material.AIR) {
-                        blockList.add(new ItemStack(i.getBlockData().getMaterial(), 1));
-                        Jobs.sync(() -> {
-                            ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
-                            if (stw[0]) {
-                                return;
-                            }
-                            if (e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) {
+                    Jobs.sync(() -> {
+                        ItemStack is = e.getPlayer().getInventory().getItemInMainHand();
+                        if (stw[0]) {
+                            return;
+                        }
+                        if (e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) {
 
-                                if (!i.getBlockData().getAsString().contains("leaves")) { // not leaves
-                                    if (!IrisFellerSettings.USE_DURABILITY.get() || !(is.getItemMeta() != null && is.getItemMeta().isUnbreakable())) {
-                                        double max = Math.min(((double) is.getEnchantmentLevel(Enchantment.DURABILITY)) / 6, 0.35);
-                                        if (Math.random() < 0.5 - max) {
-                                            is.setDurability((short) (is.getDurability() + 1));
-                                        }
+                            if (!i.getBlockData().getAsString().contains("leaves")) { // not leaves
+                                if (!IrisFellerSettings.USE_DURABILITY.get() || !(is.getItemMeta() != null && is.getItemMeta().isUnbreakable())) {
+                                    double max = Math.min(((double) is.getEnchantmentLevel(Enchantment.DURABILITY)) / 6, 0.35);
+                                    if (Math.random() < 0.5 - max) {
+                                        is.setDurability((short) (is.getDurability() + 1));
                                     }
-
-                                    if (is.getDurability() >= is.getType().getMaxDurability()) {
-                                        is = new ItemStack(Material.AIR);
-                                        stw[0] = true;
-                                        e.getPlayer().sendMessage("Item Broken");
-                                    }
-                                    e.getPlayer().getInventory().setItemInMainHand(is);
                                 }
 
-                                breakBlock(i, is, e.getPlayer(), blockList, e);
+                                if (is.getDurability() >= is.getType().getMaxDurability()) {
+                                    is = new ItemStack(Material.AIR);
+                                    hasher(blockDupeList, e);
+                                    stw[0] = true;
+                                }
+                                e.getPlayer().getInventory().setItemInMainHand(is);
+                            }
 
-
-                            } else {
+                            blockDupeList.add(i.getType());
+                            blocks.remove(i);
+                            breakBlock(i, is, e.getPlayer(), e);
+                            IrisFeller.info(String.valueOf(blocks.size()));
+                            if(blocks.size() == 0) {
+                                hasher(blockDupeList, e);
                                 stw[0] = true;
                             }
-                        });
-                    }
+
+                        } else {
+                            hasher(blockDupeList, e);
+                            stw[0] = true;
+                        }
+                    });
+
                 }
-                IrisFeller.info(String.valueOf(blockList));
             });
+
         }  // Not an iris block
     }
 
-    private void dumpInv(Player p, ArrayList<ItemStack> iStack) {
-        for (ItemStack i : iStack) {
-            p.getInventory().addItem(i);
-        }
+    private void hasher(List<Material> blockDupeList, BlockBreakEvent e) {
+        Map<Material, Long> couterMap = blockDupeList.stream().collect(Collectors.groupingBy(d -> d, Collectors.counting()));
+        IrisFeller.info("Counter: " + couterMap.toString());
+        e.getPlayer().sendMessage("Counter: " + couterMap);
+        Jobs.sync(() -> couterMap.forEach((material, count) -> {
+            if (material.toString().contains("LEAVES")) {
+                e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(Material.getMaterial(material.toString().replace("_LEAVES", "_SAPLING")), 5));
+                return;
+            }
+            int sCount = (count.intValue() / 64);
 
+            if (count.intValue() > 64) {
+                for (int i = sCount; i >= 0; i--) {
+                    if (e.getPlayer().getInventory().firstEmpty() != -1) {
+                        e.getPlayer().getInventory().addItem(new ItemStack(material));
+                    } else {
+                        e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(material, count.intValue() % 64));
+                    }
+                    e.getPlayer().sendMessage("" + material + " : " + count);
+
+                }
+            } else {
+                if (e.getPlayer().getInventory().firstEmpty() != -1) {
+                    e.getPlayer().getInventory().addItem(new ItemStack(material, Math.toIntExact(count)));
+                } else {
+                    e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(material, count.intValue()));
+                }
+                e.getPlayer().sendMessage("" + material + " : " + count);
+
+            }
+        }));
     }
 
-    
-    private void breakBlock(Block i, ItemStack is, Player p, List<ItemStack> blockList, BlockBreakEvent e){
+    private void breakBlock(Block i, ItemStack is, Player p, BlockBreakEvent e) {
         IrisToolbeltManager.deleteMantleBlock(e.getBlock().getWorld(), i.getX(), i.getY(), i.getZ());
         //todo Perms or plugin Hooks for breaks
-        if (IrisFellerSettings.DROP_NATURALLY.get()){
+        if (IrisFellerSettings.DROP_NATURALLY.get()) {
             i.breakNaturally(is);
         } else {
             i.getWorld().getBlockAt(i.getLocation()).setType(Material.AIR);
@@ -120,7 +151,20 @@ public class BlockBreakLogger implements Listener {
         while ((block = list.poll()) != null) {
             getConnectedBlockRelation(block, set, list, id);
         }
-        return set;
+        return blockCleanup(set);
+    }
+
+    private Set<Block> blockCleanup(Set<Block> set) {
+        ArrayList<String> blacklist = new ArrayList<>(Arrays.asList("STONE", "GRASS", "GRASS_BLOCK", "COBBLESTONE", "DIRT", "COARSE_DIRT", "ANDESITE", "GRAVEL", "BLUE_ORCHID", "AIR"));
+        Set<Block> noAirSet = new LinkedHashSet<>();
+        set.forEach(block -> {
+            if (!block.getType().isAir() && !blacklist.contains(block.getBlockData().getMaterial().toString())) {            //todo: BLACKLIST
+                noAirSet.add(block);
+            }
+        });
+
+
+        return noAirSet;
     }
 
     private static final BlockVector[] faces = {

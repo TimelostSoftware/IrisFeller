@@ -4,6 +4,7 @@ import com.timelost.irisfeller.util.settings.Entry;
 import com.timelost.irisfeller.util.settings.types.EntryType;
 import com.timelost.irisfeller.util.settings.Settings;
 
+
 import java.io.File;
 
 public class IrisFellerSettings extends Settings {
