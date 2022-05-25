@@ -15,7 +15,7 @@ public class IrisFellerSettings extends Settings {
     public static final Entry<Boolean> USE_DURABILITY = new Entry<>("useDurability", EntryType.BOOLEAN, true, b -> { });
     public static final Entry<Boolean> USE_SOUNDS = new Entry<>("useSounds", EntryType.BOOLEAN, true, b -> { });
     public static final Entry<Boolean> USE_EASTEREGG_SOUNDS = new Entry<>("useEasterEggSounds", EntryType.BOOLEAN, true, b -> { });
-    public static final Entry<Boolean> DROP_NATURALLY = new Entry<>("breakNaturally", EntryType.BOOLEAN, true, b -> { });
+    public static final Entry<Boolean> DROP_NATURALLY = new Entry<>("breakNaturally", EntryType.BOOLEAN, false, b -> { });
 
     public IrisFellerSettings(File parentDir) {
         super(IrisFeller.getPlugin().getLogger(), new File(parentDir, "settings.json"));
