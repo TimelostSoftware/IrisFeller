@@ -101,15 +101,16 @@ public class BlockBreakLogger implements Listener {
                 return;
             }
 
-            long sCount = count / 64;
 
             //Main Stacks
             if (count >= 64) {
-                for (int i = 0; i < sCount; i++) {
-                    if (e.getPlayer().getInventory().firstEmpty() != -1) {
-                        e.getPlayer().getInventory().addItem(new ItemStack(material, 64));
-                    } else {
-                        e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(material, 64));
+                for (int i = 1; i < count + 1; i++) {
+                    if ((i % 64) == 0) {
+                        if (e.getPlayer().getInventory().firstEmpty() != -1) {
+                            e.getPlayer().getInventory().addItem(new ItemStack(material, 64));
+                        } else {
+                            e.getPlayer().getWorld().dropItemNaturally(e.getPlayer().getLocation(), new ItemStack(material, 64));
+                        }
                     }
                 }
             }
@@ -167,7 +168,7 @@ public class BlockBreakLogger implements Listener {
     }
 
     private Set<Block> blockCleanup(Set<Block> set) {
-        ArrayList<String> blacklist = new ArrayList<>(Arrays.asList("STONE", "GRASS", "GRASS_BLOCK", "COBBLESTONE", "DIRT", "COARSE_DIRT", "ANDESITE", "GRAVEL", "BLUE_ORCHID", "AIR"));
+        ArrayList<String> blacklist = new ArrayList<>(Arrays.asList("STONE", "GRASS", "GRASS_BLOCK", "COBBLESTONE", "DIRT", "COARSE_DIRT", "ANDESITE", "GRAVEL", "AIR"));
         Set<Block> noAirSet = new LinkedHashSet<>();
         set.forEach(block -> {
             if (!block.getType().isAir() && !blacklist.contains(block.getBlockData().getMaterial().toString())) {            //todo: BLACKLIST
