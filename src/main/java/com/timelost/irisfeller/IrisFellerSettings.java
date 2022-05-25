@@ -26,7 +26,7 @@ public class IrisFellerSettings extends Settings {
     public static final Entry<Boolean> DROP_NATURALLY = new Entry<>("breakNaturally", EntryType.BOOLEAN, false, b -> IrisFeller.info("HOTLOADED DROP_NATURALLY." + b));
     public static final Entry<List<Material>> BLACKLIST = new Entry<>(
             "blacklist",
-            EntryType.STRING.mapTo(
+            EntryType.STRING.alias(
                     s -> EnumEntryType.getEnumOrDefault(Material.class, Material.AIR, e -> s.equals(e.getKey().toString())),
                     m -> m.getKey().toString()).listOf(),
             Lists.newArrayList(Material.AIR, Material.STONE, Material.GRASS, Material.GRASS_BLOCK, Material.COBBLESTONE, Material.DIRT, Material.COARSE_DIRT, Material.ANDESITE, Material.GRAVEL),

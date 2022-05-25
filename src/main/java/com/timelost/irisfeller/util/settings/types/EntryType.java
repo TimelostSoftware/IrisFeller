@@ -6,6 +6,7 @@ import com.timelost.irisfeller.util.Serializable;
 import com.timelost.irisfeller.util.settings.ParseResult;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public interface EntryType<E> {
@@ -15,7 +16,7 @@ public interface EntryType<E> {
 
     default EntryType<List<E>> listOf() { return new ListEntryType<>(this); }
 
-    default <V> EntryType<V> mapTo(Function<E, V> to, Function<V, E> from) {
+    default <V> EntryType<V> alias(Function<E, V> to, Function<V, E> from) {
         EntryType<E> et = this;
         return new EntryType<>() {
             public ParseResult<V> parse(JsonElement element) {
@@ -100,5 +101,7 @@ public interface EntryType<E> {
         public JsonElement serialize(Double object) { return new JsonPrimitive(object); }
     };
 
-    static <E extends Enum<E> & Serializable<String>> EntryType<E> ofEnum(Class<E> enumClass) { return new EnumEntryType<>(enumClass); }
+    static <E extends Enum<E> & Serializable<String>> EntryType<E> enumType(Class<E> enumClass) { return new EnumEntryType<>(enumClass); }
+
+    static <K, V> EntryType<Map<K, V>> mapType(EntryType<K> key, EntryType<V> value) { return new MapEntryType<>(key, value); }
 }
