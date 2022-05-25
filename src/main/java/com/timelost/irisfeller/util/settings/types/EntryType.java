@@ -6,6 +6,7 @@ import com.timelost.irisfeller.util.Serializable;
 import com.timelost.irisfeller.util.settings.ParseResult;
 
 import java.util.List;
+import java.util.function.Function;
 
 public interface EntryType<E> {
 
@@ -13,6 +14,19 @@ public interface EntryType<E> {
     JsonElement serialize(E object);
 
     default EntryType<List<E>> listOf() { return new ListEntryType<>(this); }
+
+    default <V> EntryType<V> mapTo(Function<E, V> to, Function<V, E> from) {
+        EntryType<E> et = this;
+        return new EntryType<>() {
+            public ParseResult<V> parse(JsonElement element) {
+                ParseResult<E> value = et.parse(element);
+                if(value.hasError())
+                    return ParseResult.error("Failed to parse mapped EntryType: " + element, value.getError());
+                return ParseResult.of(to.apply(value.getResult()));
+            }
+            public JsonElement serialize(V object) { return et.serialize(from.apply(object)); }
+        };
+    }
 
     EntryType<Boolean> BOOLEAN = new EntryType<>() {
         public ParseResult<Boolean> parse(JsonElement e) {
