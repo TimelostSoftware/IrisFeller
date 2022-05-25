@@ -49,7 +49,7 @@ public class BlockBreakLogger implements Listener {
                             return;
                         }
                         if (e.getPlayer().getInventory().getItemInMainHand().getType().toString().toLowerCase().contains("_axe")) {
-                            if (!i.getBlockData().getAsString().contains("leaves")) { // not leaves
+                            if (!i.getBlockData().getAsString().contains("leaves")) { // not damage for leaves
                                 if (!IrisFellerSettings.USE_DURABILITY.get() || !(is.getItemMeta() != null && is.getItemMeta().isUnbreakable())) {
                                     double max = Math.min(((double) is.getEnchantmentLevel(Enchantment.DURABILITY)) / 6, 0.35);
                                     if (Math.random() < 0.5 - max) {
@@ -168,10 +168,11 @@ public class BlockBreakLogger implements Listener {
     }
 
     private Set<Block> blockCleanup(Set<Block> set) {
-        ArrayList<String> blacklist = new ArrayList<>(Arrays.asList("STONE", "GRASS", "GRASS_BLOCK", "COBBLESTONE", "DIRT", "COARSE_DIRT", "ANDESITE", "GRAVEL", "AIR"));
+
+        List<Material> blacklist = IrisFellerSettings.BLACKLIST.get();
         Set<Block> noAirSet = new LinkedHashSet<>();
         set.forEach(block -> {
-            if (!block.getType().isAir() && !blacklist.contains(block.getBlockData().getMaterial().toString())) {            //todo: BLACKLIST
+            if (!block.getType().isAir() && !blacklist.contains(block.getBlockData().getMaterial())) {            //todo: BLACKLIST
                 noAirSet.add(block);
             }
         });
