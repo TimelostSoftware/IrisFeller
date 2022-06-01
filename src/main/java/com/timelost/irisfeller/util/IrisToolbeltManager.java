@@ -6,11 +6,6 @@ import org.bukkit.block.data.BlockData;
 import java.lang.reflect.Method;
 
 public class IrisToolbeltManager {
-    public static void setup() throws Throwable {
-        Method m = Class.forName("com.volmit.iris.core.tools.IrisToolbelt").getDeclaredMethod("retainMantleDataForSlice", String.class);
-        m.invoke(null, String.class.getCanonicalName());
-        m.invoke(null, BlockData.class.getCanonicalName());
-    }
 
     public static boolean hasMantleObject(World world, int x, int y, int z) {
         return getMantleIdentity(world, x, y, z) != null;

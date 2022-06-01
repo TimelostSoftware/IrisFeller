@@ -27,7 +27,6 @@ public class IrisFeller extends JavaPlugin {
         sync = new TheChonker(false);
 
         try {
-            IrisToolbeltManager.setup();
             startup("Hello Iris! i got your objects!");
         } catch (Throwable e) {
             e.printStackTrace();
