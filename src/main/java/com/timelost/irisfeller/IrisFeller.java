@@ -1,12 +1,10 @@
 package com.timelost.irisfeller;
 
-import com.timelost.irisfeller.util.IrisToolbeltManager;
 import com.timelost.irisfeller.util.Jobs;
 import com.timelost.irisfeller.util.TheChonker;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 
 
 public class IrisFeller extends JavaPlugin {
