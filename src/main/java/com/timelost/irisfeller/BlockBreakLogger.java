@@ -89,7 +89,6 @@ public class BlockBreakLogger implements Listener {
 
     private void dimPocketItems(List<Material> blockDupeList, BlockBreakEvent e) {
         Map<Material, Long> couterMap = blockDupeList.stream().collect(Collectors.groupingBy(d -> d, Collectors.counting()));
-        IrisFeller.info("Counter: " + couterMap.toString());
         Jobs.sync(() -> couterMap.forEach((material, count) -> {
             if (material.toString().contains("LEAVES")) {
                 if (e.getPlayer().getInventory().firstEmpty() != -1) {

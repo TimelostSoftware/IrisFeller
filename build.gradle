@@ -1,39 +1,55 @@
+/*
+ * IrisFeller is Copyright (c) 2021 Arcane Arts (Volmit Software)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 plugins {
     id 'java'
-    id 'io.freefair.lombok' version '5.2.1'
+    id 'java-library'
+    id "io.freefair.lombok" version "6.3.0"
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "de.undercouch.download" version "5.0.1"
 }
 
 group 'com.irisfeller.IrisFeller'
 version '1.1.0'
+def nmsVersion = "1.19.2" //[NMS]
 def apiVersion = '1.19'
+def specialSourceVersion = '1.11.0' //[NMS]
+def spigotJarVersion = '1.19.2-R0.1-SNAPSHOT' //[NMS]
+def name = getRootProject().getName() // Defined in settings.gradle
 def main = 'com.timelost.irisfeller.IrisFeller'
-def name = 'IrisFeller'
 
+
+// ADD YOURSELF AS A NEW LINE IF YOU WANT YOUR OWN BUILD TASK GENERATED
 // ======================== WINDOWS =============================
+registerCustomOutputTask('Cyberpwn', 'C://Users/cyberpwn/Documents/development/server/plugins')
 registerCustomOutputTask('Psycho', 'D://Dan/MinecraftDevelopment/server/plugins')
-registerCustomOutputTask('Vatuu', 'D://Minecraft/Servers/1.19/plugins')
 // ========================== UNIX ==============================
+registerCustomOutputTaskUnix('CyberpwnLT', '/Users/danielmills/development/server/plugins')
 registerCustomOutputTaskUnix('PsychoLT', '/Users/brianfopiano/Desktop/REMOTES/RemoteMinecraft/plugins')
 // ==============================================================
 
-
-
+/**
+ * Gradle is weird sometimes, we need to delete the plugin yml from the build folder to actually filter properly.
+ */
 file(jar.archiveFile.get().getAsFile().getParentFile().getParentFile().getParentFile().getAbsolutePath() + '/build/resources/main/plugin.yml').delete()
 
-repositories {
-    maven { url "https://dl.cloudsmith.io/public/arcane/archive/maven/" }
-    mavenCentral()
-    mavenLocal()
-
-}
-
-dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    implementation 'org.spigotmc:spigot:1.19-R0.1-SNAPSHOT'
-    implementation 'com.google.code.gson:gson:2.9.0'
-}
-
+/**
+ * Expand properties into plugin yml
+ */
 processResources {
     filesMatching('**/plugin.yml') {
         expand(
@@ -45,38 +61,62 @@ processResources {
     }
 }
 
-def registerCustomOutputTask(name, path) {
-    if (!System.properties['os.name'].toLowerCase().contains('windows')) {
-        return;
-    }
-
-    tasks.register('build' + name, Copy) {
-        group('development')
-        outputs.upToDateWhen { false }
-        dependsOn(jar)
-        from(new File(buildDir, "libs/IrisFeller-" + version + ".jar"))
-        into(file(path))
-        rename { String fileName ->
-            fileName.replace("IrisFeller-" + version + ".jar", "IrisFeller.jar")
+/**
+ * Unified repo
+ */
+repositories {
+    mavenLocal {
+        content {
+            includeGroup("org.bukkit")
+            includeGroup("org.spigotmc")
         }
+    }
+    maven { url "https://arcanearts.jfrog.io/artifactory/archives" }
+
+}
+
+/**
+ * We need parameter meta for the decree command system
+ */
+compileJava {
+    options.compilerArgs << '-parameters'
+}
+
+/**
+ * Configure IrisFeller for shading
+ */
+shadowJar {
+    //minimize()
+    append("plugin.yml")
+    relocate 'io.papermc.lib', 'com.volmit.irisfeller.util.paper'dependencies {
+        include(dependency('io.papermc:paperlib'))
+        include(dependency('com.dfsek:Paralithic'))
+        include(dependency('net.kyori:'))
     }
 }
 
-def registerCustomOutputTaskUnix(name, path) {
-    if (System.properties['os.name'].toLowerCase().contains('windows')) {
-        return;
-    }
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 60, 'minutes'
+    resolutionStrategy.cacheDynamicVersionsFor 60, 'minutes'
+}
 
-    tasks.register('build' + name, Copy) {
-        group('development')
-        outputs.upToDateWhen { false }
-        dependsOn(jar)
-        from(new File(buildDir, "libs/IrisFeller-" + version + ".jar"))
-        into(file(path))
-        rename { String fileName ->
-            fileName.replace("IrisFeller-" + version + ".jar", "IrisFeller.jar")
-        }
-    }
+dependencies {
+    // Provided or Classpath
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    implementation 'org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT' //[NMS]
+    implementation 'org.bukkit:craftbukkit:1.19.2-R0.1-SNAPSHOT' //[NMS]
+
+    // Cancer
+    implementation 'com.elmakers.mine.bukkit:EffectLib:9.4'
+
+    // Shaded
+    implementation 'io.papermc:paperlib:1.0.5'
+
+    // Dynamically Loaded
+    implementation 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'com.google.code.gson:gson:2.9.0'
 }
 
 if (JavaVersion.current().toString() != "17") {
@@ -95,4 +135,157 @@ if (JavaVersion.current().toString() != "17") {
     System.err.println("=========================================================================================================")
     System.err.println()
     System.exit(69);
+}
+
+def buildToolsJar = new File(buildDir, "buildtools/BuildTools.jar");
+def specialSourceJar = new File(buildDir, "specialsource/SpecialSource.jar");
+def buildToolsFolder = new File(buildDir, "buildtools");
+def specialSourceFolder = new File(buildDir, "specialsource");
+def buildToolsHint = new File(buildDir, "buildtools/craftbukkit-" + nmsVersion + ".jar");
+def outputShadeJar = new File(buildDir, "libs/IrisFeller-" + version + "-all.jar");
+def ssiJar = new File(buildDir, "specialsource/IrisFeller-" + version + "-all.jar");
+def ssobfJar = new File(buildDir, "specialsource/IrisFeller-" + version + "-rmo.jar");
+def ssJar = new File(buildDir, "specialsource/IrisFeller-" + version + "-rma.jar");
+def homePath = System.properties['user.home']
+def m2 = new File(homePath + "/.m2/repository")
+def m2s = m2.getAbsolutePath();
+
+// ======================== Building Mapped Jars =============================
+task downloadBuildtools(type: Download) {
+    group "remapping"
+    src 'https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar'
+    dest buildToolsJar
+    onlyIf {
+        !buildToolsJar.exists()
+    }
+}
+
+task downloadSpecialSource(type: Download) {
+    group "remapping"
+    src 'https://repo.maven.apache.org/maven2/net/md-5/SpecialSource/' + specialSourceVersion + '/SpecialSource-'+specialSourceVersion+'-shaded.jar'
+    dest specialSourceJar
+    onlyIf {
+        !specialSourceJar.exists()
+    }
+}
+
+task executeBuildTools(dependsOn: downloadBuildtools, type: JavaExec)
+{
+    group "remapping"
+    classpath = files(buildToolsJar)
+    workingDir = buildToolsFolder
+    args = [
+            "--rev",
+            nmsVersion,
+            "--compile",
+            "craftbukkit",
+            "--remap"
+    ]
+    onlyIf {
+        !buildToolsHint.exists()
+    }
+}
+
+task copyBuildToSpecialSource(type: Copy)
+{
+    group "remapping"
+    from outputShadeJar
+    into specialSourceFolder
+    dependsOn(downloadSpecialSource, shadowJar)
+}
+
+task specialSourceRemapObfuscate(type: JavaExec)
+{
+    group "remapping"
+    dependsOn(copyBuildToSpecialSource, downloadSpecialSource, shadowJar)
+    workingDir = specialSourceFolder
+    classpath = files(specialSourceJar,
+            new File(m2s + "/org/spigotmc/spigot/" + spigotJarVersion + "/spigot-" + spigotJarVersion + "-remapped-mojang.jar"))
+    mainClass = "net.md_5.specialsource.SpecialSource"
+    args = [
+            "--live",
+            "-i",
+            ssiJar.getName(),
+            "-o",
+            ssobfJar.getName(),
+            "-m",
+            m2s + "/org/spigotmc/minecraft-server/" + spigotJarVersion + "/minecraft-server-" + spigotJarVersion + "-maps-mojang.txt",
+            "--reverse",
+    ]
+}
+
+task specialSourceRemap(type: JavaExec)
+{
+    group "remapping"
+    dependsOn(specialSourceRemapObfuscate)
+    workingDir = specialSourceFolder
+    classpath = files(specialSourceJar,
+            new File(m2s + "/org/spigotmc/spigot/" + spigotJarVersion + "/spigot-" + spigotJarVersion + "-remapped-obf.jar"))
+    mainClass = "net.md_5.specialsource.SpecialSource"
+    args = [
+            "--live",
+            "-i",
+            ssobfJar.getName(),
+            "-o",
+            ssJar.getName(),
+            "-m",
+            m2s + "/org/spigotmc/minecraft-server/" + spigotJarVersion + "/minecraft-server-" + spigotJarVersion + "-maps-spigot.csrg"
+    ]
+}
+
+tasks.compileJava.dependsOn(executeBuildTools)
+
+compileJava {
+    options.encoding = "UTF-8"
+}
+
+task setup()
+{
+    group("irisfeller")
+    dependsOn(clean, executeBuildTools)
+}
+
+task irisfeller(type: Copy)
+{
+    group "irisfeller"
+    from ssJar
+    into buildDir
+    rename { String fileName ->
+        fileName.replace('IrisFeller-' + version + '-rma.jar', "IrisFeller-" + version + ".jar")
+    }
+    dependsOn(specialSourceRemap)
+}
+
+def registerCustomOutputTask(name, path) {
+    if (!System.properties['os.name'].toLowerCase().contains('windows')) {
+        return;
+    }
+
+    tasks.register('build' + name, Copy) {
+        group('development')
+        outputs.upToDateWhen { false }
+        dependsOn(irisfeller)
+        from(new File(buildDir, "IrisFeller-" + version + ".jar"))
+        into(file(path))
+        rename { String fileName ->
+            fileName.replace("IrisFeller-" + version + ".jar", "IrisFeller.jar")
+        }
+    }
+}
+
+def registerCustomOutputTaskUnix(name, path) {
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+        return;
+    }
+
+    tasks.register('build' + name, Copy) {
+        group('development')
+        outputs.upToDateWhen { false }
+        dependsOn(iris)
+        from(new File(buildDir, "IrisFeller-" + version + ".jar"))
+        into(file(path))
+        rename { String fileName ->
+            fileName.replace("IrisFeller-" + version + ".jar", "IrisFeller.jar")
+        }
+    }
 }

@@ -21,8 +21,7 @@ public class TheChonker {
     private void tick() {
         if(queue.peek() != null){
             if(IrisFellerSettings.DEBUG.get()){
-                IrisFeller.info("Current Active Queue: "+ queue.size() );
-
+//                IrisFeller.info("Current Active Queue: "+ queue.size() );
             }
         }
         PrecisionStopwatch p = PrecisionStopwatch.start();
