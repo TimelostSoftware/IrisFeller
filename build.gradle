@@ -36,7 +36,7 @@ def main = 'com.timelost.irisfeller.IrisFeller'
 // ADD YOURSELF AS A NEW LINE IF YOU WANT YOUR OWN BUILD TASK GENERATED
 // ======================== WINDOWS =============================
 registerCustomOutputTask('Cyberpwn', 'C://Users/cyberpwn/Documents/development/server/plugins')
-registerCustomOutputTask('Psycho', 'D://Dan/MinecraftDevelopment/server/plugins')
+registerCustomOutputTask('Psycho', 'C://Dan/MinecraftDevelopment/server/plugins')
 // ========================== UNIX ==============================
 registerCustomOutputTaskUnix('CyberpwnLT', '/Users/danielmills/development/server/plugins')
 registerCustomOutputTaskUnix('PsychoLT', '/Users/brianfopiano/Desktop/REMOTES/RemoteMinecraft/plugins')
