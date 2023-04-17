@@ -25,10 +25,10 @@ plugins {
 
 group 'com.irisfeller.IrisFeller'
 version '1.1.0'
-def nmsVersion = "1.19.2" //[NMS]
+def nmsVersion = "1.19.4" //[NMS]
 def apiVersion = '1.19'
 def specialSourceVersion = '1.11.0' //[NMS]
-def spigotJarVersion = '1.19.2-R0.1-SNAPSHOT' //[NMS]
+def spigotJarVersion = '1.19.4-R0.1-SNAPSHOT' //[NMS]
 def name = getRootProject().getName() // Defined in settings.gradle
 def main = 'com.timelost.irisfeller.IrisFeller'
 
@@ -104,8 +104,8 @@ dependencies {
     // Provided or Classpath
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    implementation 'org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT' //[NMS]
-    implementation 'org.bukkit:craftbukkit:1.19.2-R0.1-SNAPSHOT' //[NMS]
+    implementation 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT' //[NMS]
+    implementation 'org.bukkit:craftbukkit:1.19.4-R0.1-SNAPSHOT' //[NMS]
 
     // Cancer
     implementation 'com.elmakers.mine.bukkit:EffectLib:9.4'
@@ -116,7 +116,7 @@ dependencies {
     // Dynamically Loaded
     implementation 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.10'
 }
 
 if (JavaVersion.current().toString() != "17") {
